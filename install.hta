@@ -1,0 +1,115 @@
+<html>
+<HEAD>
+
+<title>Jello Dashboard 5 Control Center</title>
+<HTA:APPLICATION ID="jellocc" 
+    APPLICATIONNAME="jello Dashboard 5 Control Center" 
+    BORDER="thin"
+    CAPTION="yes"
+    ICON="img\logo.ico"
+    SHOWINTASKBAR="yes"
+    SINGLEINSTANCE="no"
+    SYSMENU="yes"
+>
+
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<!--
+Jello.Dashboard Control Center
+-------------------------------
+(c)2006-09 Nicolas Sivridis
+http://jello-dashboard.net
+-------------------------------
+Feel free to modify the code
+bring on your comments and suggestions
+and share!
+-------------------------------
+
+//    This file is part of Jello Dashboard.
+//
+//    Jello Dashboard is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+
+//    Jello Dashboard is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with Jello Dashboard.  If not, see <http://www.gnu.org/licenses/>.
+
+
+-->
+
+
+
+
+<!-- /////////////////////STYLE.css///////////////////// -->
+
+
+
+    
+    
+<meta http-equiv="Content-Language" content="en-us">
+
+
+
+
+
+
+
+<!-- //////////////////////////////////////////////////////// -->
+
+
+</HEAD>
+<!-- /////////////////////HTML OF PAGE///////////////////// -->
+<body>
+
+
+  <div id="loading-mask"></div>
+  <div id="loading">
+    <div class="loading-indicator"><img src="extjs/resources/images/default/shared/blue-loading.gif" width="32" height="32" style="margin-right:8px;" align="absmiddle"/><span id="loading-msg">Loading...</span></div>
+  </div>
+
+<script type="text/javascript">status = 'Loading language variables...';</script>
+<script id=langscript language=javascript src="langs/lang-en.js"></script>
+<script type="text/javascript">document.getElementById('loading-msg').innerHTML = 'Loading extJS...';</script> 
+<script type="text/javascript" src="extjs/ext-base.js"></script>
+<script type="text/javascript" src="extjs/ext-all.js"></script>
+
+<script type="text/javascript">document.getElementById('loading-msg').innerHTML = 'Loading scripts...';</script>
+
+<script type="text/javascript">status = 'Loading js files...';</script>
+<script language=javascript src="js\customSettings.js"></script>
+<script language=javascript src="js/util.js"></script>
+<script language=javascript src="js/outlook.js"></script>
+<script language=javascript src="js/jello.js"></script>
+<!--customSettings.js is only created by HTA installer for customizing the settings journal entry-->
+<script language=javascript src="js/customSettings.js"></script>
+<!--********************************************************************************************-->
+ 
+  
+
+<script type="text/javascript">status = 'Rendering...';</script>  
+  
+  <div id="toplayer" style=background:yellow;position:absolute;height:0px;width:0px;visibility:hidden;>
+
+  </div>
+  <div id="screen">
+  </div>
+  <div id="main">
+  </div>
+
+<link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css" href="js/style.css" />
+
+
+ 
+<script type="text/javascript">document.getElementById('loading-msg').innerHTML = 'Starting...';</script>
+<script language=javascript src="js/install.js"></script>
+<script type="text/javascript">status = 'Ready';</script>
+
+</body>
+</html>
