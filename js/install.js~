@@ -54,10 +54,10 @@ rfun1+="<br><a class=jellolink href='#' onclick=javascript:pSettings();><img cla
 var rfun3="<a class=jellolink onclick=pRun('jello5.hta')><img class='htaimg' src='img\\review.gif' />Run Jello without Outlook</a><br>";
 rfun3+="<a class=jellolink onclick=pRun2('jello5.htm')><img class='htaimg' src='img\\page_url.gif' />Run in Internet Explorer</a><br>";
 rfun3+="<a class=jellolink onclick=pRun('help.pdf')><img class='htaimg' src='img\\icon_info.gif' /><b>"+txtHelp+"</b></a><br>";
-var rfun4="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://jello-dashboard.net');><img class='htaimg' src='img\\j-icon.gif' /><b>Jello Web page</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://www.jello-dashboard.net/forum');><img class='htaimg' src='img\\ud-tags (7).gif' /><b>Jello Forums</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://sourceforge.net/projects/jello5/');><img class='htaimg' src='img\\ud-tags (48).gif' /><b>Sourceforge page</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.com/nicksiv/jello-dashboard/');><img class='htaimg' src='img\\ud-tags (49).gif' /><b>Github source code</b></a><br>";
+var rfun4="<a class=jellolink href='http://www.jello-dashboard.net'><img class='htaimg' src='img\\j-icon.gif' /><b>Jello Web page</b></a><br>";
+rfun4+="<a class=jellolink href='http://www.jello-dashboard.net/forum'><img class='htaimg' src='img\\ud-tags (7).gif' /><b>Jello Forums</b></a><br>";
+rfun4+="<a class=jellolink href='http://sourceforge.net/projects/jello5/'><img class='htaimg' src='img\\ud-tags (48).gif' /><b>Sourceforge page</b></a><br>";
+rfun4+="<a class=jellolink href='https://github.com/nicksiv/jello-dashboard/'><img class='htaimg' src='img\\ud-tags (49).gif' /><b>Github source code</b></a><br>";
 
 
 
@@ -497,10 +497,4 @@ var bup=jese.systemJournalEntry.Copy();
 
 bup.Subject+=" "+txtBackup+"@"+new Date().format('j F Y (H:i)');
 bup.Save();
-}
-
-function openWebLinkinDefaultBrowser(url)
-{
-      var shell = new ActiveXObject("WScript.Shell");
-      shell.run(url);
 }

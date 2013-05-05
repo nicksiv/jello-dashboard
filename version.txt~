@@ -1,6 +1,3 @@
-varsion 5.30
-- Changed install.hta interface
-
 version 5.26
 - Changed: Shortcut key for ticklers popup to Ctrl+Alt+w
 - Changed: Main icon top menu replaced the old hyperlinks

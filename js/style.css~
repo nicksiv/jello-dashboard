@@ -664,13 +664,6 @@ font-size:10px;
 border-bottom:1px dotted black;
 }
 
-.htaimg
-{
-
-margin-right:8px;
-
-}
-
 .TIK {background-image:url(../img/calendar.gif) !important;}
 .IMP {background-image:url(../img/icon_alert.gif) !important;}
 .WFL {background-image:url(../img/j-icon.gif) !important;}

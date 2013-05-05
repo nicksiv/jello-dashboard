@@ -19,7 +19,7 @@
 var useTables=true;
 
 //----define global variables----
-var jelloVersion="Jello.Dashboard 5.30 beta (Soñador)";
+var jelloVersion="Jello.Dashboard 5.26 beta (Astral)";
 var itms=new Array();
 var jello;
 var its;
