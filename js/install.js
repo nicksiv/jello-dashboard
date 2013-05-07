@@ -48,8 +48,9 @@ function pHome(){}
 function paintScreen()
 {
 
-var rfun1="<a class=jellolink href='#' onclick=javascript:pInstall();><img class='htaimg' src='img\\ud-tags (15).gif' /><b>"+txtInOLSetUp+"</b></a>";
-rfun1+="<br><a class=jellolink href='#' onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' /><b>"+txtInSetLoca+"</b></a>";
+var rfun1="<a class=jellolink onclick=javascript:pQuickSetup();><img class='htaimg' src='img\\ud-tags (36).gif' /><b>Quick Setup</b></a>";
+//rfun1+="<br><a class=jellolink href='#' onclick=javascript:pInstall();><img class='htaimg' src='img\\ud-tags (15).gif' /><b>Advanced Setup</b></a>";
+
 
 var rfun3="<a class=jellolink onclick=pRun('jello5.hta')><img class='htaimg' src='img\\review.gif' />Run Jello without Outlook</a><br>";
 rfun3+="<a class=jellolink onclick=pRun2('jello5.htm')><img class='htaimg' src='img\\page_url.gif' />Run in Internet Explorer</a><br>";
@@ -60,8 +61,9 @@ rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://sourcefor
 rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.com/nicksiv/jello-dashboard/');><img class='htaimg' src='img\\ud-tags (49).gif' /><b>Github source code</b></a><br>";
 
 
+var rfun2="<a class=jellolink onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' /><b>"+txtInSetLoca+"</b></a>";
+rfun2+="<br><a class=jellolink onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' /><b>Settings Import/Export</b></a>";
 
-var rfun2="<a class=jellolink href='#' onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' /><b>Settings Import/Export</b></a>";
 
 var vp=new Ext.Viewport({
     layout: 'border',
@@ -80,24 +82,23 @@ var vp=new Ext.Viewport({
 	width:200,
 		items:[
 			{title:'Jello Setup',bodyStyle:'padding:6px',html:rfun1},
-		    	{title:'Import/Export and Sync',bodyStyle:'padding:6px',html:rfun2},
+		    	{title:'Settings Storage',bodyStyle:'padding:6px',html:rfun2},
 		    	{title:'Run Jello',bodyStyle:'padding:6px',html:rfun3},
 		    	{title:'Links',bodyStyle:'padding:6px',html:rfun4,collapsible:true}
 			]
     	},  {
         region: 'center',
-        //title: 'Title for the Grid Panel',
+        title: 'Title for the Grid Panel',
         collapsible: false,
         split: true,
 	id:'mainpanel2',
 	margins:'5 5 5 1',
-	html:'<br><br><br><br><p align=center><img src=img\\biglogo.gif><br><br><b>Welcome to Jello 5 Control Center</b><br>'+txtVersion+': <i><font color=green>'+jelloVersion+'</font></i><br><br>'+txtInWelcmsg+'</p>', 
-	layout:'accordion',
+	layout:'anchor',
         autoWidth:true
     } 
     ]
 });
-
+pQuickSetup();
 }
 
 
@@ -112,7 +113,8 @@ var simple = new Ext.FormPanel({
         labelWidth: 180,
         frame:true,
         title:txtInOLSetUp,
-        height:250,
+        renderTo:'mainpanel2',
+    	height:250,
         bodyStyle:'padding:5px 5px 0 5px',
         floating:false,
         id:'tagform',
@@ -158,6 +160,7 @@ var simple = new Ext.FormPanel({
     });
     
 simple.render(mp.getEl());
+//mp.doLayout();
 finfo.innerHTML=updateFolderInfo(defFol.EntryID);
     
 }
@@ -388,21 +391,6 @@ fso.run(furi);
 }
 
 
-function pUtils()
-{
-var mp=Ext.getCmp("mainpanel2");
-    mp.getEl().update("");
-ret="<br><br><img src=img//biglogo.gif><br><br><h1>"+txtMenuOtherFunctions+"</h1><br>";
-ret+="<a class=jellolinktop onclick=pRun('jello5.hta')>Run Jello without Outlook (jello5.hta)</a><br>";
-ret+="<a class=jellolinktop onclick=pRun2('jello5.htm')>Run Jello in Internet Explorer</a><br><br>";
-ret+="<a class=jellolinktop onclick=pRun('help.pdf')><b>"+txtHelp+"</b> (help.pdf)</a><br><br>";
-ret+="<hr><br><h1>Links</h1><br>";
-ret+="<a class=jellolinktop href='http://jello-dashboard.net'><b>Jello Dashboard home page</b></a><br>";
-ret+="<a class=jellolinktop href='http://jello-dashboard.net/forum'>Jello Forum</a><br>";
-ret+="<a class=jellolinktop href='http://code.google.com/p/jello-dashboard/'>Jello Dashboard Open Source project at Google Code</a><br><br><hr>";
-ret+="<br><br>2006-2010 Nicolas Sivridis (Licensed under Open Source Lisence GPLv3)";
-mp.getEl().update(ret);
-}
 
 function backupSettingsInst()
 {
@@ -429,14 +417,15 @@ var mp=Ext.getCmp("mainpanel2");
   var uri=getAppPath();
   var furi=uri+"/jelloSettings.txt";
   furi=furi.replace("\/install.hta","");
+  furi=furi.replace("#","");
   }
-ret="<br><br><img src=img//biglogo.gif><br><div style=background:gainsboro;><br><h1>File Operations</h1><br><hr><br><h2>Export Settings to file</h2>";
-ret+="<input class=htmlControls id=expfiled type=text size=100 value='"+furi+"'><br>"
-ret+="<input class=htmlControls type=button onclick=exportFile() value='Export Settings'><br>";
+ret="<p align=center><br><br><img src=img//biglogo.gif><br></p><div style='position:absolute;left:30px;align=center'><br><br><h2>Export Settings to file</h2>";
+ret+="<input class=htmlControls id=expfiled type=text size=80 value='"+furi+"'>&nbsp;"
+ret+="<input class=htmlControls type=button onclick=exportFile() value='Export Settings'><br></p><br><br><br>";
 ret+="<hr><br><h2>Import Settings from file</h2>";
-ret+="<input type=file class=htmlControls id=impfiled value='"+furi+"' size=90 value='Import Settings'><br>";
+ret+="<input type=file class=htmlControls id=impfiled value='"+furi+"' size=80 value='Import Settings'>&nbsp;";
 ret+="<input type=button class=htmlControls onclick=importFile() value='Import Settings'><br><br>";
-ret+="</div>";
+ret+="</div></p>";
 mp.getEl().update(ret);
 
 }
@@ -503,4 +492,214 @@ function openWebLinkinDefaultBrowser(url)
 {
       var shell = new ActiveXObject("WScript.Shell");
       shell.run(url);
+}
+
+function pQuickSetup()
+{
+//quick and automated setup in outlook
+
+    var mp=Ext.getCmp("mainpanel2");
+    mp.getEl().update("");
+
+    var msg="<table width=80% align=center><tr><td width=300 height=100 align=middle bgcolor=lightgray><a class=jellolinktop onclick=quick1();>Setup to Outlook</a>"+isJelloInstalled()+"</td><td width=20>&nbsp;</td><td align=middle width=300 bgcolor=pink><a class=jellolinktop onclick=quick2();>Remove from Outlook</a></td></tr></table></p><br><br><br>";
+
+
+var simple = new Ext.FormPanel({
+        labelWidth: 180,
+        frame:false,
+        title:'Quick Setup',
+        renderTo:'mainpanel2',
+    	autoHeight:false,
+        bodyStyle:'padding:5px 5px 0 5px',
+        floating:false,
+        id:'quickform',
+        buttonAlign:'center',
+    	html:'<br><br><p align=center><img src=img\\biglogo.gif><br><br><b>Welcome to Jello Dashboard Quick Setup</b><br>'+txtVersion+': <i><font color=green>'+jelloVersion+'</font></i><br><br><br><br>'+msg
+    });
+
+
+    var mp=Ext.getCmp("mainpanel2");
+
+simple.render(mp.getEl());
+
+
+}
+
+function getAllOLFolders()
+{
+//get all outlook folders
+
+    var flds=new Array();
+
+    for (var x=1;x<=NSpace.Folders.Count;x++)
+	{
+	   try{ flds.push(NSpace.Folders(x));}catch(e){}
+	}
+    var y=0;
+    do
+    {
+
+	for (var z=1;z<=flds[y].Folders.count;z++)
+	{
+	    try{flds.push(flds[y].folders(z));}catch(e){}
+	    x++;
+	}
+	y++;
+    } while (x<flds.length)
+
+
+return flds;
+
+}
+
+function getJelloInstFolder()
+{
+//get all outlook folder with jello installation info
+var ret="<b>Select one or more folders where <font color=green>Jello Dashboard</font> page should be linked</b><br>Please note that setting a folder's view to Jello will not harm the specific folder's data and can be easily removed.<hr><table width=95% class=showtable>";
+
+ 	var uri=getAppPath();
+    	uri=uri.replace(appName,"jello5.htm");
+    	uri=uri.replace(new RegExp("\/","g"),"\\");
+
+var olFolders=getAllOLFolders();
+    for (var x=0;x<olFolders.length;x++)
+	{
+	    var fd=olFolders[x];
+	    var hasHomepage=fd.WebViewOn;
+	    var homepage=fd.WebViewURL;
+
+	    if (homepage.search("jello5.htm")>-1 && hasHomepage)
+		{ret+="<tr><td width=40% height=30><img src=img\\database.gif>&nbsp;<b>"+(x+1)+". "+fd + "</b></td><td><img src=img\\j-icon.gif>&nbsp;<span class=tagcon>Jello Dashboard</span></td><td><a class=jelloformlink onclick=removeJelloHere('"+fd.EntryID+"')>Remove</a></td></tr>";}
+	    else
+		{
+		    
+		try{
+		    var noFlag=0;
+		    var olduri=fd.WebViewURL;
+		    var oldwv=fd.WebViewOn;
+		    fd.WebViewURL=uri;
+		    fd.WebViewOn=true;
+		    if (fd.WebViewURL!=uri){ret+="<tr><td width=40% height=30><img src=img\\delete.gif>&nbsp;<i>"+(x+1)+". "+fd+"</i></td><td><span class=tagprj>Unavailable</span></td><td></td></tr>";noFlag=1;}
+		    fd.WebViewURL=olduri;
+		    fd.WebViewOn=oldwv;
+		    if (noFlag==0){ret+="<tr><td width=40% height=30><img src=img//folder.gif>"+(x+1)+". "+fd.FolderPath+"</td><td></td><td><a class=jelloformlink onclick=installJelloHere('"+fd.EntryID+"')>Install</a></td></tr>";}
+		   }catch(e){ret+="<tr><td width=40% height=30><img src=img\\delete.gif>&nbsp;<i>"+(x+1)+". "+fd+"</i></td><td></td><td><span class=tagprj>Unavailable</span></td></tr>";}
+   
+		}
+	    
+	}
+return ret+"</table>";
+}
+
+
+function quick1()
+{
+//quick setup jello into an Outlook folder
+    var onFolder=getJelloInstFolder();
+
+    var mp=Ext.getCmp("mainpanel2");
+    mp.getEl().update("");
+
+
+var simple = new Ext.FormPanel({
+        labelWidth: 180,
+        frame:false,
+        title:'Setup to Outlook',
+        renderTo:'mainpanel2',
+    	autoHeight:false,
+        height:450,
+    	autoScroll:true,
+    	layout:'fit',
+    	bodyStyle:'padding:5px 5px 0 5px',
+        floating:false,
+        id:'quickform',
+        buttonAlign:'center',
+    	html:onFolder
+    });
+
+
+    var mp=Ext.getCmp("mainpanel2");
+
+simple.render(mp.getEl());
+
+
+}
+
+function installJelloHere(fid)
+{
+//install jello to a folder
+var jdf=NSpace.GetFolderFromID(fid);
+var choice=confirm("Do you want to setup Jello in "+jdf.FolderPath+ "?");
+  
+if (choice)
+    { 	var uri=getAppPath();
+    	uri=uri.replace(appName,"jello5.htm");
+    	uri=uri.replace(new RegExp("\/","g"),"\\");
+	jdf.WebViewURL=uri;
+	jdf.WebViewOn=true;
+	quick1();
+    }
+
+}
+
+function removeJelloHere(fid)
+{
+//install jello to a folder
+var jdf=NSpace.GetFolderFromID(fid);
+var choice=confirm("Do you want to remove Jello from "+jdf.FolderPath+ "?");
+  
+if (choice)
+    { 
+    
+	jdf.WebViewURL="";
+	jdf.WebViewOn=false;
+	quick1();
+    }
+
+}
+
+function quick2()
+{
+//remove jello from all folders
+
+  var choice=confirm("Do you want to remove Jello Dashboard links from your Outlook folders?\nYou can set it up again any time!");
+    if (!choice){return;}
+    var olFolders=getAllOLFolders()
+    var found=0;
+    for (var x=0;x<olFolders.length;x++)
+	{
+	    var fd=olFolders[x];
+	    var hasHomepage=fd.WebViewOn;
+	    var homepage=fd.WebViewURL;
+
+	    if (homepage.search("jello5.htm")>-1 && hasHomepage)
+		{
+		    fd.WebViewURL="";
+		    fd.WebViewOn=false;
+		    found++;
+		}
+	}
+    alert(found+" Outlook folders updated\nJello Dashboard was successfully unlinked from your Outlook folders");
+    pQuickSetup();
+}
+
+function isJelloInstalled()
+{
+    var olFolders=getAllOLFolders()
+    var found="<br>&nbsp;";
+    var fcount=0;
+    for (var x=0;x<olFolders.length;x++)
+	{
+	    var fd=olFolders[x];
+	    var hasHomepage=fd.WebViewOn;
+	    var homepage=fd.WebViewURL;
+
+	    if (homepage.search("jello5.htm")>-1 && hasHomepage)
+		{
+		    found+="<span class=showtable>"+fd + " <b>|</b></span>&nbsp;";
+		    fcount++;
+		}
+	}
+if (fcount==0){found="";}
+return found;
 }

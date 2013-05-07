@@ -383,7 +383,7 @@ if(pHome.arguments.length == 0){
 
  	 ppnl.setTitle("<img src=img\\home16.png style=float:left;>"+txtHome+"&nbsp;&nbsp;&nbsp;&nbsp;<a class=jellolink style=font-weight:normal; onclick=addWidgetScreen()>"+txtAddWidget+"</a>&nbsp;|&nbsp;<a class=jellolink style=font-weight:normal; onclick=customizeWidgetScreen()>"+txtColumns+"</a>&nbsp;|&nbsp;<a class=jellolink style=font-weight:normal; onclick=resetWidgets()>"+txtReset+" Widgets</a>");
 	 
-  }else
+  }Else
 		return new Ext.ux.Portal ({
 	            xtype:'portal',
 	            id:'portalpop',
