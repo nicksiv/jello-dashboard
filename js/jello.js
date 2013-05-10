@@ -44,6 +44,7 @@ var elmRemoveTag="X";
 var webJDversion="";
 var webCheckHours=240; //check for updates every 10 days
 var setExportFile="";
+var lastTiddlyWiki="";
 
 //Icons
 var imgPath="img\\";

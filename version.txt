@@ -1,5 +1,5 @@
 varsion 5.30
-- Changed install.hta interface
+- Changed install.hta interface and renamed to jelloapp.hta
 
 version 5.26
 - Changed: Shortcut key for ticklers popup to Ctrl+Alt+w

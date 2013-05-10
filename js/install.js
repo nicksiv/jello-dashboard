@@ -36,10 +36,13 @@ document.title="Jello.Dashboard Control Center";
 Ext.onReady(function(){
 		Ext.QuickTips.init();
 paintScreen();
+//temp
+tiddlyScreen();
 
         });
 
-var appName="install.hta";
+var appName="jelloapp.hta";
+var setIntoFolder="";
 
 function validateAllFolders(){}
 function updateCSS(){}
@@ -48,22 +51,25 @@ function pHome(){}
 function paintScreen()
 {
 
-var rfun1="<a class=jellolink onclick=javascript:pQuickSetup();><img class='htaimg' src='img\\ud-tags (36).gif' /><b>Quick Setup</b></a>";
+var rfun1="<a class=jellolink onclick=javascript:pQuickSetup();><img class='htaimg' src='img\\ud-tags (36).gif' />Quick Setup</a><br>";
+rfun1+="<a class=jellolink onclick=javascript:pOutlookRun();><img class='htaimg' src='img\\ud-folder (14).gif' />Run in Outlook</a><br>";
+rfun1+="<a class=jellolink onclick=javascript:pOutlookInfo();><img class='htaimg' src='img\\info.gif' />Outlook information</a>";
 //rfun1+="<br><a class=jellolink href='#' onclick=javascript:pInstall();><img class='htaimg' src='img\\ud-tags (15).gif' /><b>Advanced Setup</b></a>";
 
 
 var rfun3="<a class=jellolink onclick=pRun('jello5.hta')><img class='htaimg' src='img\\review.gif' />Run Jello without Outlook</a><br>";
 rfun3+="<a class=jellolink onclick=pRun2('jello5.htm')><img class='htaimg' src='img\\page_url.gif' />Run in Internet Explorer</a><br>";
-rfun3+="<a class=jellolink onclick=pRun('help.pdf')><img class='htaimg' src='img\\icon_info.gif' /><b>"+txtHelp+"</b></a><br>";
-var rfun4="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://jello-dashboard.net');><img class='htaimg' src='img\\j-icon.gif' /><b>Jello Web page</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://www.jello-dashboard.net/forum');><img class='htaimg' src='img\\ud-tags (7).gif' /><b>Jello Forums</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://sourceforge.net/projects/jello5/');><img class='htaimg' src='img\\ud-tags (48).gif' /><b>Sourceforge page</b></a><br>";
-rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.com/nicksiv/jello-dashboard/');><img class='htaimg' src='img\\ud-tags (49).gif' /><b>Github source code</b></a><br>";
+rfun3+="<a class=jellolink onclick=pRun('help.pdf')><img class='htaimg' src='img\\icon_info.gif' />"+txtHelp+"</a><br>";
+var rfun4="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://jello-dashboard.net');><img class='htaimg' src='img\\j-icon.gif' />Jello Web page</a><br>";
+rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://www.jello-dashboard.net/forum');><img class='htaimg' src='img\\ud-tags (7).gif' />Jello Forums</a><br>";
+rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('http://sourceforge.net/projects/jello5/');><img class='htaimg' src='img\\ud-tags (48).gif' />Sourceforge page</a><br>";
+rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.com/nicksiv/jello-dashboard/');><img class='htaimg' src='img\\ud-tags (49).gif' />Github source code</a><br>";
 
 
-var rfun2="<a class=jellolink onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' /><b>"+txtInSetLoca+"</b></a>";
-rfun2+="<br><a class=jellolink onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' /><b>Settings Import/Export</b></a>";
+var rfun2="<a class=jellolink onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' />"+txtInSetLoca+"</a>";
+rfun2+="<br><a class=jellolink onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' />Settings Import/Export</a>";
 
+var rfun5="<a class=jellolink onclick=javascript:pWiki();><img class='htaimg' src='img\\page_url.gif' />Tiddly Wiki</a>";
 
 var vp=new Ext.Viewport({
     layout: 'border',
@@ -81,10 +87,12 @@ var vp=new Ext.Viewport({
 	maxWidth:400,
 	width:200,
 		items:[
-			{title:'Jello Setup',bodyStyle:'padding:6px',html:rfun1},
+			{title:'Outlook Setup',bodyStyle:'padding:6px',html:rfun1},
 		    	{title:'Settings Storage',bodyStyle:'padding:6px',html:rfun2},
+		    	{title:'Syncronize data',bodyStyle:'padding:6px',html:rfun5},
+
 		    	{title:'Run Jello',bodyStyle:'padding:6px',html:rfun3},
-		    	{title:'Links',bodyStyle:'padding:6px',html:rfun4,collapsible:true}
+		    	{title:'Links',bodyStyle:'padding:6px',html:rfun4,collapsible:true,collapsed:true}
 			]
     	},  {
         region: 'center',
@@ -416,7 +424,7 @@ var mp=Ext.getCmp("mainpanel2");
   {
   var uri=getAppPath();
   var furi=uri+"/jelloSettings.txt";
-  furi=furi.replace("\/install.hta","");
+  furi=furi.replace("\/"+appName,"");
   furi=furi.replace("#","");
   }
 ret="<p align=center><br><br><img src=img//biglogo.gif><br></p><div style='position:absolute;left:30px;align=center'><br><br><h2>Export Settings to file</h2>";
@@ -507,7 +515,7 @@ function pQuickSetup()
 var simple = new Ext.FormPanel({
         labelWidth: 180,
         frame:false,
-        title:'Quick Setup',
+        title:'Outlook Setup',
         renderTo:'mainpanel2',
     	autoHeight:false,
         bodyStyle:'padding:5px 5px 0 5px',
@@ -696,10 +704,60 @@ function isJelloInstalled()
 
 	    if (homepage.search("jello5.htm")>-1 && hasHomepage)
 		{
-		    found+="<span class=showtable>"+fd + " <b>|</b></span>&nbsp;";
+		   // found+="<span class=showtable>"+fd + " <b>|</b></span>&nbsp;";
+		    setIntoFolder=fd.FolderPath;
 		    fcount++;
 		}
 	}
 if (fcount==0){found="";}
-return found;
+return found+"<span class=showtable>Currently linked to "+fcount+" Outlook folder(s)</span>";
+}
+
+function pOutlookRun()
+{
+//run outlook and display jello folder
+var furi="outlook.exe /select outlook:"+setIntoFolder
+var fso=new ActiveXObject("WScript.Shell");
+fso.run(furi);
+
+}
+
+function pOutlookInfo()
+{
+//display general info
+    var gset=genSettings();
+    gset=gset.replace("\/"+appName,"");
+    var mp=Ext.getCmp("mainpanel2");
+    mp.getEl().update("");
+
+
+var simple = new Ext.FormPanel({
+        labelWidth: 180,
+        frame:false,
+        title:'Outlook information',
+        renderTo:'mainpanel2',
+    	autoHeight:false,
+        height:450,
+    	autoScroll:true,
+    	layout:'fit',
+    	bodyStyle:'padding:5px 5px 0 5px',
+        floating:false,
+        id:'infoform',
+        buttonAlign:'center',
+    	html:gset
+    });
+
+
+
+simple.render(mp.getEl());
+
+
+}
+
+
+function pWiki()
+{
+//sync a tiddlywiki
+// tiddly.js
+tiddlyScreen();
 }
