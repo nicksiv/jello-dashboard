@@ -37,7 +37,7 @@ Ext.onReady(function(){
 		Ext.QuickTips.init();
 paintScreen();
 //temp
-tiddlyScreen();
+//tiddlyScreen();
 
         });
 
@@ -69,7 +69,7 @@ rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.c
 var rfun2="<a class=jellolink onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' />"+txtInSetLoca+"</a>";
 rfun2+="<br><a class=jellolink onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' />Settings Import/Export</a>";
 
-var rfun5="<a class=jellolink onclick=javascript:pWiki();><img class='htaimg' src='img\\page_url.gif' />Tiddly Wiki</a>";
+var rfun5="<a class=jellolink onclick=javascript:pWiki();><img class='htaimg' src='img\\page_url.gif' />Export to Tiddly Wiki</a>";
 
 var vp=new Ext.Viewport({
     layout: 'border',
@@ -755,9 +755,23 @@ simple.render(mp.getEl());
 }
 
 
+function htaResize()
+{
+	if (conStatus=="Outlook ActiveX")
+{
+if(typeof(oJello.applicationName)!="undefined")
+	{
+	jello.htaWidth=document.body.clientWidth;
+	jello.htaHeight=document.body.clientHeight;
+	jese.saveCurrent();
+	}
+}
+}
+
 function pWiki()
 {
 //sync a tiddlywiki
 // tiddly.js
 tiddlyScreen();
 }
+

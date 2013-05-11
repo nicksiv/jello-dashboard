@@ -1760,7 +1760,8 @@ jn=it.UserProperties.Item("jnotes").Value;
 return jn;
 }
 
-function /* FaultyJusers */	getJNotesProperty(it){
+function getJNotesProperty(it){
+ /* FaultyJusers */
 //this pops up security prompts at all times
 //get custom notes field value. Create if not exists
 var jn="";

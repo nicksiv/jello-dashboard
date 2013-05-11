@@ -1,4 +1,5 @@
 varsion 5.30
+- Added Tiddlywiki export of Outlook data
 - Changed install.hta interface and renamed to jelloapp.hta
 
 version 5.26

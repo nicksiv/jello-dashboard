@@ -159,17 +159,23 @@ var wikiFile=Ext.getCmp("ttwsync").getValue();
 var tagSkip=Ext.getCmp("twskip").getValue();
 var privSkip=Ext.getCmp("skprv").getValue();
 
-var jpath=getAppPath().replace(appName,"")+"res/";
+var jpath=getAppPath().replace(appName,"")+"/res/";
+//temp
+//var jpath=getAppPath().replace("jelloapp.html","")+"/res/";
 
 var sourceWiki=jpath+"tw.html";
 var destWiki=wikiFile;
 
+var tsaverJAR=jpath+"TiddlySaver.jar";
+
+if (wikiFile.substr(wikiFile.length-5,5)!=".html" || wikiFile.substr(wikiFile.length-4,4)!=".htm") {wikiFile+=".html";}
 
 var fso = new ActiveXObject("Scripting.FileSystemObject");
 try{
 var file=fso.getfile(wikiFile);
 if (confirm("Replace existing file?")==false){return;}
 }catch(e){}
+
 
 
 //--fs object
@@ -380,7 +386,7 @@ if (confirm("Replace existing file?")==false){return;}
 	var ff=NSpace.GetFolderFromID(jello.actionFolder);
 	var f=ff.Items.Restrict("@SQL=http://schemas.microsoft.com/mapi/id/{00062003-0000-0000-C000-000000000046}/81010003 <> 2");
 	
-	for (var x=1;x<f.Count;x++)
+	for (var x=1;x<=f.Count;x++)
 	{
 	var tgstring=f(x).itemProperties.item(catProperty).Value+";"
 	var ts=tgstring.split(";");
@@ -417,7 +423,7 @@ if (confirm("Replace existing file?")==false){return;}
 	 taskBody=itb;
 	 bodyFrom="ol";
 	    //TODO get jello notes
-	    //if (!notEmpty(itb)){taskBody=getJNotesProperty(f(x));bodyFrom="jd";}
+	    if (!notEmpty(itb)){taskBody=getJNotesProperty(f(x));bodyFrom="jd";}
 
 	 
 	  TWbody+='<div title="'+manualConvertUnicodeToUTF8(f(x).Subject)+'" modifier="'+creator+'" created="'+icreation+'" modified="'+imodif+'" tags="'+manualConvertUnicodeToUTF8(tagString)+'" changecount="1" notes="'+bodyFrom+'" olid="'+f(x).EntryID+'">\n<pre>'+manualConvertUnicodeToUTF8(taskBody)+'</pre></div>\n';
@@ -450,24 +456,33 @@ tagStore.filter("istag",true);
 tagStore.clearFilter();
 
 //--menus and defaults
-var TWother='<div title="DefaultTiddlers" modifier="'+creator+'" created="'+icreation+'" modified="'+imodif+'" tags="jello template" changecount="1">\n<pre>[[Next Actions]]\n[[Jello.wiki Tag List]]</pre></div>\n';
+var TWother='<div title="DefaultTiddlers" modifier="'+creator+'" created="'+icreation+'" modified="'+imodif+'" tags="jello template" changecount="1">\n<pre>[[Jello.wiki Tag List]]\n[[Next Actions]]</pre></div>\n';
 TWother+='<div title="Next Actions" modifier="'+creator+'" created="'+icreation+'" modified="'+imodif+'" changecount="1">\n<pre>&#60;&#60;gtdActionList jd.next&#62;&#62;</pre></div>\n';
 TWother+='<div title="Jello Dashboard" modifier="'+creator+'" created="'+icreation+'" modified="'+imodif+'" changecount="1">\n<pre>TiddlyWiki created by Jello Dashboard\n----[[GettingStarted]]\n[[DefaultTiddlers]]</pre></div>\n';
    
-   var twStream = fs.OpenTextFile(destWiki,2,-1,0);
+    try{
+   var twStream = fs.OpenTextFile(destWiki,2,-1,0); }catch(e){alert("Could not create file. Probably folder does not exist yet!");return;}
    var wss=TWheader+"\n"+otherTiddlers+"\n"+TWbody+"\n"+TWtags+"\n"+TWother+"\n"+TWfooter;
    twStream.Write(wss);
    twStream.Close();
    fs=null;
    //update link to the new twiki
 
-  
+var file=fso.getfile(destWiki);
+var tsjarfile=fso.getfile(tsaverJAR);
+var dfol=file.ParentFolder+"/TiddlySaver.jar";
+tsjarfile.Copy(dfol);  
    var dlink=destWiki;
    dlink=dlink.replace(new RegExp("\/","g"),"\//");
+jello.lastTiddlyWiki=destWiki;
+jese.saveCurrent();
 //   Ext.getCmp("twok").hide();
 
+
+
    Ext.getCmp("reslabel2").update("<br><br><br><p align='center'><b>Your TiddlyWiki is Ready!</b><br>&nbsp;<a class=jellolinktop href='"+dlink+"'>Click to open, or Right click here and click Save As</a> to move it to another location</p><br>");
-  
+
+alert("Tiddlywiki file created");  
 //--------
 
 }
@@ -610,4 +625,29 @@ function(match, p1, p2, p3, offset, s)
 {
 return String.fromCharCode(p2 || ("0" + p3));
 });
+}
+
+function getJNotesProperty(it){
+ // duplicate function so you dont have to load actionlist.js
+//this pops up security prompts at all times
+//get custom notes field value. Create if not exists
+var jn="";
+if (OLversion >= 12 && jello.autoUpdateTaskNotes==true && jello.autoUpdateSecuredFields==true)
+{
+	// notes are in the body
+	var oln = getOLBodySection(it,jelloNotesDelim);
+	if(oln != null)
+		jn = oln;
+	else{
+		// didn't find notes in body, see if in custom field
+		var itm = it.UserProperties.Find("jnotes",true);
+		if( itm != null )
+			jn = itm.Value;
+	}
+}else{
+try{
+jn=it.UserProperties.Item("jnotes").Value;
+}catch(e){it.UserProperties.Add("jnotes",1,true);}
+}
+return jn;
 }

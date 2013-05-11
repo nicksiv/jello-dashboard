@@ -444,7 +444,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 <pre>&lt;!--{{{--&gt;
 &lt;div class='header' macro='gradient vert [[ColorPalette::PrimaryLight]] [[ColorPalette::PrimaryMid]]'&gt;
 &lt;div class='headerShadow'&gt;
-&lt;span class='siteTitle' refresh='content' tiddler='SiteTitle'&gt;&lt;/span&gt;&amp;nbsp;
+&lt;span class='siteTitle'  refresh='content' tiddler='SiteTitle'&gt;&lt;/span&gt;&amp;nbsp;
 &lt;span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'&gt;&lt;/span&gt;
 &lt;/div&gt;
 &lt;div class='headerForeground'&gt;
@@ -512,15 +512,439 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
+<div title="CalendarPlugin" creator="Jello" modifier="Jello" created="201305110809" tags="systemConfig" changecount="1">
+<pre>/***
+|Name|CalendarPlugin|
+|Source|http://www.TiddlyTools.com/#CalendarPlugin|
+|Version|2008.06.17|
+|Author|Eric Shulman|
+|Original Author|SteveRumsby|
+|License|unknown|
+|~CoreVersion|2.1|
+|Type|plugin|
+|Requires||
+|Overrides||
+|Options|##Configuration|
+|Description|display monthly and yearly calendars|
+
+NOTE: For enhanced date display (including popups), you must also install [[DatePlugin]]
+!!!!!Usage:
+&lt;&lt;&lt;
+|{{{&lt;&lt;calendar&gt;&gt;}}}|Produce a full-year calendar for the current year|
+|{{{&lt;&lt;calendar year&gt;&gt;}}}|Produce a full-year calendar for the given year|
+|{{{&lt;&lt;calendar year month&gt;&gt;}}}|Produce a one-month calendar for the given month and year|
+|{{{&lt;&lt;calendar thismonth&gt;&gt;}}}|Produce a one-month calendar for the current month|
+|{{{&lt;&lt;calendar lastmonth&gt;&gt;}}}|Produce a one-month calendar for last month|
+|{{{&lt;&lt;calendar nextmonth&gt;&gt;}}}|Produce a one-month calendar for next month|
+&lt;&lt;&lt;
+!!!!!Configuration:
+&lt;&lt;&lt;
+|''First day of week:''&lt;br&gt;{{{config.options.txtCalFirstDay}}}|&lt;&lt;option txtCalFirstDay&gt;&gt;|(Monday = 0, Sunday = 6)|
+|''First day of weekend:''&lt;br&gt;{{{config.options.txtCalStartOfWeekend}}}|&lt;&lt;option txtCalStartOfWeekend&gt;&gt;|(Monday = 0, Sunday = 6)|
+
+&lt;&lt;option chkDisplayWeekNumbers&gt;&gt; Display week numbers //(note: Monday will be used as the start of the week)//
+|''Week number display format:''&lt;br&gt;{{{config.options.txtWeekNumberDisplayFormat }}}|&lt;&lt;option txtWeekNumberDisplayFormat &gt;&gt;|
+|''Week number link format:''&lt;br&gt;{{{config.options.txtWeekNumberLinkFormat }}}|&lt;&lt;option txtWeekNumberLinkFormat &gt;&gt;|
+&lt;&lt;&lt;
+!!!!!Revisions
+&lt;&lt;&lt;
+2008.06.17: added support for config.macros.calendar.todaybg
+2008.02.27: in handler(), DON'T set hard-coded default date format, so that *customized* value (pre-defined in config.macros.calendar.journalDateFmt is used.
+2008.02.17: in createCalendarYear(), fix next/previous year calculation (use parseInt() to convert to numeric value).  Also, use journalDateFmt for date linking when NOT using [[DatePlugin]].
+2008.02.16: in createCalendarDay(), week numbers now created as TiddlyLinks, allowing quick creation/navigation to 'weekly' journals (based on request from Kashgarinn)
+2008.01.08: in createCalendarMonthHeader(), &quot;month year&quot; heading is now created as TiddlyLink, allowing quick creation/navigation to 'month-at-a-time' journals
+2007.11.30: added &quot;return false&quot; to onclick handlers (prevent IE from opening blank pages)
+2006.08.23: added handling for weeknumbers (code supplied by Martin Budden (see &quot;wn**&quot; comment marks).  Also, incorporated updated by Jeremy Sheeley to add caching for reminders (see [[ReminderMacros]], if installed)
+2005.10.30: in config.macros.calendar.handler(), use &quot;tbody&quot; element for IE compatibility.  Also, fix year calculation for IE's getYear() function (which returns '2005' instead of '105'). Also, in createCalendarDays(), use showDate() function (see [[DatePlugin]], if installed) to render autostyled date with linked popup.  Updated calendar stylesheet definition: use .calendar class-specific selectors, add text centering and margin settings
+2006.05.29: added journalDateFmt handling
+&lt;&lt;&lt;
+***/
+/***
+!!!!!Code section:
+***/
+//{{{
+version.extensions.calendar = { major: 0, minor: 7, revision: 0, date: new Date(2008, 6, 17)};
+
+if(config.options.txtCalFirstDay == undefined)
+  config.options.txtCalFirstDay = 0;
+if(config.options.txtCalStartOfWeekend == undefined)
+  config.options.txtCalStartOfWeekend = 5;
+if(config.options.chkDisplayWeekNumbers == undefined)//wn**
+  config.options.chkDisplayWeekNumbers = false;
+if(config.options.chkDisplayWeekNumbers)
+  config.options.txtCalFirstDay = 0;
+if(config.options.txtWeekNumberDisplayFormat == undefined)//wn**
+  config.options.txtWeekNumberDisplayFormat = &quot;w0WW&quot;;
+if(config.options.txtWeekNumberLinkFormat == undefined)//wn**
+  config.options.txtWeekNumberLinkFormat = &quot;YYYY-w0WW&quot;;
+
+config.macros.calendar = {};
+config.macros.calendar.monthnames = [&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;];
+config.macros.calendar.daynames = [&quot;M&quot;, &quot;T&quot;, &quot;W&quot;, &quot;T&quot;, &quot;F&quot;, &quot;S&quot;, &quot;S&quot;];
+config.macros.calendar.todaybg = &quot;#ccccff&quot;;
+config.macros.calendar.weekendbg = &quot;#c0c0c0&quot;;
+config.macros.calendar.monthbg = &quot;#e0e0e0&quot;;
+config.macros.calendar.holidaybg = &quot;#ffc0c0&quot;;
+config.macros.calendar.journalDateFmt = &quot;DD MMM YYYY&quot;;
+config.macros.calendar.monthdays = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+config.macros.calendar.holidays = [ ]; // Not sure this is required anymore - use reminders instead
+//}}}
+//{{{
+function calendarIsHoliday(date) // Is the given date a holiday?
+{
+	var longHoliday = date.formatString(&quot;0DD/0MM/YYYY&quot;);
+	var shortHoliday = date.formatString(&quot;0DD/0MM&quot;);
+	for(var i = 0; i &lt; config.macros.calendar.holidays.length; i++) {
+		if(config.macros.calendar.holidays[i] == longHoliday || config.macros.calendar.holidays[i] == shortHoliday)
+			return true;
+	}
+	return false;
+}
+//}}}
+//{{{
+config.macros.calendar.handler = function(place,macroName,params) {
+	var calendar = createTiddlyElement(place, &quot;table&quot;, null, &quot;calendar&quot;, null);
+	var tbody = createTiddlyElement(calendar, &quot;tbody&quot;, null, null, null);
+	var today = new Date();
+	var year = today.getYear();
+	if (year&lt;1900) year+=1900;
+
+ 	// get format for journal link by reading from SideBarOptions (ELS 5/29/06 - based on suggestion by Martin Budden)
+	var text = store.getTiddlerText(&quot;SideBarOptions&quot;);
+	var re = new RegExp(&quot;&lt;&lt;(?:newJournal)([^&gt;]*)&gt;&gt;&quot;,&quot;mg&quot;); var fm = re.exec(text);
+	if (fm &amp;&amp; fm[1]!=null) { var pa=fm[1].readMacroParams(); if (pa[0]) this.journalDateFmt = pa[0]; }
+
+	if (params[0] == &quot;thismonth&quot;) {
+		cacheReminders(new Date(year, today.getMonth(), 1, 0, 0), 31);
+		createCalendarOneMonth(tbody, year, today.getMonth());
+	} 
+	else if (params[0] == &quot;lastmonth&quot;) {
+		var month = today.getMonth()-1; if (month==-1) { month=11; year--; }
+		cacheReminders(new Date(year, month, 1, 0, 0), 31);
+		createCalendarOneMonth(tbody, year, month);
+	}
+	else if (params[0] == &quot;nextmonth&quot;) {
+		var month = today.getMonth()+1; if (month&gt;11) { month=0; year++; }
+		cacheReminders(new Date(year, month, 1, 0, 0), 31);
+		createCalendarOneMonth(tbody, year, month);
+	} else {
+		if (params[0]) year = params[0];
+		if(params[1]) {
+			cacheReminders(new Date(year, params[1]-1, 1, 0, 0), 31);
+			createCalendarOneMonth(tbody, year, params[1]-1);
+		} else {
+			cacheReminders(new Date(year, 0, 1, 0, 0), 366);
+			createCalendarYear(tbody, year);
+		}
+	}
+	window.reminderCacheForCalendar = null;
+}
+//}}}
+//{{{
+//This global variable is used to store reminders that have been cached
+//while the calendar is being rendered.  It will be renulled after the calendar is fully rendered.
+window.reminderCacheForCalendar = null;
+//}}}
+//{{{
+function cacheReminders(date, leadtime)
+{
+	if (window.findTiddlersWithReminders == null) return;
+	window.reminderCacheForCalendar = {};
+	var leadtimeHash = [];
+	leadtimeHash [0] = 0;
+	leadtimeHash [1] = leadtime;
+	var t = findTiddlersWithReminders(date, leadtimeHash, null, 1);
+	for(var i = 0; i &lt; t.length; i++) {
+		//just tag it in the cache, so that when we're drawing days, we can bold this one.
+		window.reminderCacheForCalendar[t[i][&quot;matchedDate&quot;]] = &quot;reminder:&quot; + t[i][&quot;params&quot;][&quot;title&quot;]; 
+	}
+}
+//}}}
+//{{{
+function createCalendarOneMonth(calendar, year, mon)
+{
+	var row = createTiddlyElement(calendar, &quot;tr&quot;, null, null, null);
+	createCalendarMonthHeader(calendar, row, config.macros.calendar.monthnames[mon] + &quot; &quot; + year, true, year, mon);
+	row = createTiddlyElement(calendar, &quot;tr&quot;, null, null, null);
+	createCalendarDayHeader(row, 1);
+	createCalendarDayRowsSingle(calendar, year, mon);
+}
+//}}}
+//{{{
+function createCalendarMonth(calendar, year, mon)
+{
+	var row = createTiddlyElement(calendar, &quot;tr&quot;, null, null, null);
+	createCalendarMonthHeader(calendar, row, config.macros.calendar.monthnames[mon] + &quot; &quot; + year, false, year, mon);
+	row = createTiddlyElement(calendar, &quot;tr&quot;, null, null, null);
+	createCalendarDayHeader(row, 1);
+	createCalendarDayRowsSingle(calendar, year, mon);
+}
+//}}}
+//{{{
+function createCalendarYear(calendar, year)
+{
+	var row;
+	row = createTiddlyElement(calendar, &quot;tr&quot;, null, null, null);
+	var back = createTiddlyElement(row, &quot;td&quot;, null, null, null);
+	var backHandler = function() {
+		removeChildren(calendar);
+		createCalendarYear(calendar, parseInt(year)-1);
+		return false; // consume click
+	};
+	createTiddlyButton(back, &quot;&lt;&quot;, &quot;Previous year&quot;, backHandler);
+	back.align = &quot;center&quot;;
+	var yearHeader = createTiddlyElement(row, &quot;td&quot;, null, &quot;calendarYear&quot;, year);
+	yearHeader.align = &quot;center&quot;;
+	yearHeader.setAttribute(&quot;colSpan&quot;,config.options.chkDisplayWeekNumbers?22:19);//wn**
+	var fwd = createTiddlyElement(row, &quot;td&quot;, null, null, null);
+	var fwdHandler = function() {
+		removeChildren(calendar);
+		createCalendarYear(calendar, parseInt(year)+1);
+		return false; // consume click
+	};
+	createTiddlyButton(fwd, &quot;&gt;&quot;, &quot;Next year&quot;, fwdHandler);
+	fwd.align = &quot;center&quot;;
+	createCalendarMonthRow(calendar, year, 0);
+	createCalendarMonthRow(calendar, year, 3);
+	createCalendarMonthRow(calendar, year, 6);
+	createCalendarMonthRow(calendar, year, 9);
+}
+//}}}
+//{{{
+function createCalendarMonthRow(cal, year, mon)
+{
+	var row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+	createCalendarMonthHeader(cal, row, config.macros.calendar.monthnames[mon], false, year, mon);
+	createCalendarMonthHeader(cal, row, config.macros.calendar.monthnames[mon+1], false, year, mon);
+	createCalendarMonthHeader(cal, row, config.macros.calendar.monthnames[mon+2], false, year, mon);
+	row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+	createCalendarDayHeader(row, 3);
+	createCalendarDayRows(cal, year, mon);
+}
+//}}}
+//{{{
+function createCalendarMonthHeader(cal, row, name, nav, year, mon)
+{
+	var month;
+	if (nav) {
+		var back = createTiddlyElement(row, &quot;td&quot;, null, null, null);
+		back.align = &quot;center&quot;;
+		back.style.background = config.macros.calendar.monthbg;
+
+		var backMonHandler = function() {
+			var newyear = year;
+			var newmon = mon-1;
+			if(newmon == -1) { newmon = 11; newyear = newyear-1;}
+			removeChildren(cal);
+			cacheReminders(new Date(newyear, newmon , 1, 0, 0), 31);
+			createCalendarOneMonth(cal, newyear, newmon);
+			return false; // consume click
+		};
+		createTiddlyButton(back, &quot;&lt;&quot;, &quot;Previous month&quot;, backMonHandler);
+		month = createTiddlyElement(row, &quot;td&quot;, null, &quot;calendarMonthname&quot;)
+		createTiddlyLink(month,name,true);
+		month.setAttribute(&quot;colSpan&quot;, config.options.chkDisplayWeekNumbers?6:5);//wn**
+		var fwd = createTiddlyElement(row, &quot;td&quot;, null, null, null);
+		fwd.align = &quot;center&quot;;
+		fwd.style.background = config.macros.calendar.monthbg; 
+
+		var fwdMonHandler = function() {
+			var newyear = year;
+			var newmon = mon+1;
+			if(newmon == 12) { newmon = 0; newyear = newyear+1;}
+			removeChildren(cal);
+			cacheReminders(new Date(newyear, newmon , 1, 0, 0), 31);
+			createCalendarOneMonth(cal, newyear, newmon);
+			return false; // consume click
+		};
+		createTiddlyButton(fwd, &quot;&gt;&quot;, &quot;Next month&quot;, fwdMonHandler);
+	} else {
+		month = createTiddlyElement(row, &quot;td&quot;, null, &quot;calendarMonthname&quot;, name)
+		month.setAttribute(&quot;colSpan&quot;,config.options.chkDisplayWeekNumbers?8:7);//wn**
+	}
+	month.align = &quot;center&quot;;
+	month.style.background = config.macros.calendar.monthbg;
+}
+//}}}
+//{{{
+function createCalendarDayHeader(row, num)
+{
+	var cell;
+	for(var i = 0; i &lt; num; i++) {
+		if (config.options.chkDisplayWeekNumbers) createTiddlyElement(row, &quot;td&quot;);//wn**
+		for(var j = 0; j &lt; 7; j++) {
+			var d = j + (config.options.txtCalFirstDay - 0);
+			if(d &gt; 6) d = d - 7;
+			cell = createTiddlyElement(row, &quot;td&quot;, null, null, config.macros.calendar.daynames[d]);
+			if(d == (config.options.txtCalStartOfWeekend-0) || d == (config.options.txtCalStartOfWeekend-0+1))
+				cell.style.background = config.macros.calendar.weekendbg;
+		}
+	}
+}
+//}}}
+//{{{
+function createCalendarDays(row, col, first, max, year, mon) {
+	var i;
+	if (config.options.chkDisplayWeekNumbers){
+		if (first&lt;=max) {
+			var ww = new Date(year,mon,first);
+			var td=createTiddlyElement(row, &quot;td&quot;);//wn**
+			var link=createTiddlyLink(td,ww.formatString(config.options.txtWeekNumberLinkFormat),false);
+			link.appendChild(document.createTextNode(ww.formatString(config.options.txtWeekNumberDisplayFormat)));
+		}
+		else createTiddlyElement(row, &quot;td&quot;, null, null, null);//wn**
+	}
+	for(i = 0; i &lt; col; i++)
+		createTiddlyElement(row, &quot;td&quot;, null, null, null);
+	var day = first;
+	for(i = col; i &lt; 7; i++) {
+		var d = i + (config.options.txtCalFirstDay - 0);
+		if(d &gt; 6) d = d - 7;
+		var daycell = createTiddlyElement(row, &quot;td&quot;, null, null, null);
+		var isaWeekend = ((d == (config.options.txtCalStartOfWeekend-0) || d == (config.options.txtCalStartOfWeekend-0+1))? true:false);
+		if(day &gt; 0 &amp;&amp; day &lt;= max) {
+			var celldate = new Date(year, mon, day);
+			// ELS 2005.10.30: use &lt;&lt;date&gt;&gt; macro's showDate() function to create popup
+			// ELS 5/29/06 - use journalDateFmt 
+			if (window.showDate)
+				showDate(daycell,celldate,&quot;popup&quot;,&quot;DD&quot;,config.macros.calendar.journalDateFmt,true, isaWeekend);
+			else {
+				if(isaWeekend) daycell.style.background = config.macros.calendar.weekendbg;
+				var title = celldate.formatString(config.macros.calendar.journalDateFmt);
+				if(calendarIsHoliday(celldate))
+					daycell.style.background = config.macros.calendar.holidaybg;
+				var now=new Date();
+				if ((now-celldate&gt;=0) &amp;&amp; (now-celldate&lt;86400000)) // is today?
+					daycell.style.background = config.macros.calendar.todaybg;
+				if(window.findTiddlersWithReminders == null) {
+					var link = createTiddlyLink(daycell, title, false);
+					link.appendChild(document.createTextNode(day));
+				} else
+					var button = createTiddlyButton(daycell, day, title, onClickCalendarDate);
+			}
+		}
+		day++;
+	}
+}
+//}}}
+//{{{
+// We've clicked on a day in a calendar - create a suitable pop-up of options.
+// The pop-up should contain:
+//  * a link to create a new entry for that date
+//  * a link to create a new reminder for that date
+//  * an &lt;hr&gt;
+//  * the list of reminders for that date
+// NOTE: The following code is only used when [[DatePlugin]] is not present
+function onClickCalendarDate(e)
+{
+	var button = this;
+	var date = button.getAttribute(&quot;title&quot;);
+	var dat = new Date(date.substr(6,4), date.substr(3,2)-1, date.substr(0, 2));
+
+	date = dat.formatString(config.macros.calendar.journalDateFmt);
+	var popup = createTiddlerPopup(this);
+	popup.appendChild(document.createTextNode(date));
+	var newReminder = function() {
+		var t = store.getTiddlers(date);
+		displayTiddler(null, date, 2, null, null, false, false);
+		if(t) {
+			document.getElementById(&quot;editorBody&quot; + date).value += &quot;\n&lt;&lt;reminder day:&quot; + dat.getDate() +
+				&quot; month:&quot; + (dat.getMonth()+1) + &quot; year:&quot; + (dat.getYear()+1900) + &quot; title: &gt;&gt;&quot;;
+		} else {
+			document.getElementById(&quot;editorBody&quot; + date).value = &quot;&lt;&lt;reminder day:&quot; + dat.getDate() +
+				&quot; month:&quot; + (dat.getMonth()+1) +&quot; year:&quot; + (dat.getYear()+1900) + &quot; title: &gt;&gt;&quot;;
+		}
+		return false; // consume click
+	};
+	var link = createTiddlyButton(popup, &quot;New reminder&quot;, null, newReminder); 
+	popup.appendChild(document.createElement(&quot;hr&quot;));
+	var t = findTiddlersWithReminders(dat, [0,14], null, 1);
+	for(var i = 0; i &lt; t.length; i++) {
+		link = createTiddlyLink(popup, t[i].tiddler, false);
+		link.appendChild(document.createTextNode(t[i].tiddler));
+	}
+	return false; // consume click
+}
+//}}}
+//{{{
+function calendarMaxDays(year, mon)
+{
+	var max = config.macros.calendar.monthdays[mon];
+	if(mon == 1 &amp;&amp; (year % 4) == 0 &amp;&amp; ((year % 100) != 0 || (year % 400) == 0)) max++;
+	return max;
+}
+//}}}
+//{{{
+function createCalendarDayRows(cal, year, mon)
+{
+	var row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+	var first1 = (new Date(year, mon, 1)).getDay() -1 - (config.options.txtCalFirstDay-0);
+	if(first1 &lt; 0) first1 = first1 + 7;
+	var day1 = -first1 + 1;
+	var first2 = (new Date(year, mon+1, 1)).getDay() -1 - (config.options.txtCalFirstDay-0);
+	if(first2 &lt; 0) first2 = first2 + 7;
+	var day2 = -first2 + 1;
+	var first3 = (new Date(year, mon+2, 1)).getDay() -1 - (config.options.txtCalFirstDay-0);
+	if(first3 &lt; 0) first3 = first3 + 7;
+	var day3 = -first3 + 1;
+
+	var max1 = calendarMaxDays(year, mon);
+	var max2 = calendarMaxDays(year, mon+1);
+	var max3 = calendarMaxDays(year, mon+2);
+
+	while(day1 &lt;= max1 || day2 &lt;= max2 || day3 &lt;= max3) {
+		row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+		createCalendarDays(row, 0, day1, max1, year, mon); day1 += 7;
+		createCalendarDays(row, 0, day2, max2, year, mon+1); day2 += 7;
+		createCalendarDays(row, 0, day3, max3, year, mon+2); day3 += 7;
+	}
+}
+//}}}
+//{{{
+function createCalendarDayRowsSingle(cal, year, mon)
+{
+	var row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+	var first1 = (new Date(year, mon, 1)).getDay() -1 - (config.options.txtCalFirstDay-0);
+	if(first1 &lt; 0) first1 = first1+ 7;
+	var day1 = -first1 + 1;
+	var max1 = calendarMaxDays(year, mon);
+	while(day1 &lt;= max1) {
+		row = createTiddlyElement(cal, &quot;tr&quot;, null, null, null);
+		createCalendarDays(row, 0, day1, max1, year, mon); day1 += 7;
+	}
+}
+//}}}
+//{{{
+setStylesheet(&quot;.calendar, .calendar table, .calendar th, .calendar tr, .calendar td { text-align:center; } .calendar, .calendar a { margin:0px !important; padding:0px !important; }&quot;, &quot;calendarStyles&quot;);
+//}}}</pre>
+</div>
+<div title="ColorPalette" creator="Jello" modifier="Jello" created="201305110757" modified="201305110803" changecount="12">
+<pre>Background: #fff
+Foreground: #ff
+PrimaryPale: #8cf
+PrimaryLight: #18f
+PrimaryMid: #000099
+PrimaryDark: #014
+SecondaryPale: #ffc
+SecondaryLight: #fe8
+SecondaryMid: #db4
+SecondaryDark: #841
+TertiaryPale: #eee
+TertiaryLight: #ccc
+TertiaryMid: #999
+TertiaryDark: #666
+Error: #f88
+</pre>
+</div>
 <div title="GTDMenu" creator="YourName" modifier="YourName" created="201006051017" modified="201006081906" tags="jello template excludeLists" changecount="52">
 <pre>[[Next Actions]]
-&lt;&lt;newTiddler label:&quot;New Action&quot; prompt:&quot;Create a new action&quot; title:&quot;NewAction&quot; tag:&quot;jd.action&quot; text:{{store.getTiddlerText('NewActionTemplate')}} focus:title&gt;&gt;
+&lt;&lt;newTiddler label:&quot;New Action *&quot; prompt:&quot;Create a new action&quot; title:&quot;NewAction&quot; tag:&quot;jd.action&quot; text:{{store.getTiddlerText('NewActionTemplate')}} focus:title&gt;&gt;
 +++(gtdActionsSliderState)[Tags &gt;&gt;]
 &lt;&lt;newTiddler label:&quot;New Tag&quot; prompt:&quot;Create a new context&quot; title:&quot;NewContext&quot; tag:&quot;jd.tag&quot; text:{{store.getTiddlerText('NewContextTemplate')}} focus:title&quot;&gt;&gt; &lt;&lt;list tagged jd.tag&gt;&gt;===
 ----
 +++(gtdProjectsSliderState)[Projects &gt;&gt;]&lt;&lt;newTiddler label:&quot;New Project&quot; prompt:&quot;Create a new project&quot; title:&quot;NewProject&quot; tag:&quot;jd.project&quot; text:{{store.getTiddlerText('NewProjectTemplate')}} focus:title&gt;&gt; &lt;&lt;list tagged jd.project&gt;&gt;===</pre>
 </div>
-<div title="GTDPlugin" creator="YourName" modifier="YourName" created="201006041546" modified="201006061757" tags="systemConfig jello" changecount="6">
+<div title="GTDPlugin" creator="Jello" modifier="Jello" created="201006041546" modified="201006061757" tags="systemConfig jello" changecount="6">
 <pre>// JavaScript Document
 /***
 |''Name:''|GTDPlugins|
@@ -2013,7 +2437,7 @@ _GTD.initialize();
 //}}}
 </pre>
 </div>
-<div title="GettingStarted" creator="YourName" modifier="YourName" created="201006051721" modified="201006061901" tags="jello template" changecount="5">
+<div title="GettingStarted" creator="Jello" modifier="Jello" created="201006051721" modified="201006061901" tags="jello template" changecount="5">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
 * [[SiteTitle]] &amp; [[SiteSubtitle]]: The title and subtitle of the site, as shown above (after saving, they will also appear in the browser title bar)
 * [[MainMenu]]: The menu (usually on the left)
@@ -2022,22 +2446,23 @@ You'll also need to enter your username for signing your edits: &lt;&lt;option t
 
 For formatting instractions and info: http://tiddlywiki.org/wiki/Main_Page</pre>
 </div>
-<div title="Jello.wiki Tag List" creator="YourName" modifier="YourName" created="201006081702" modified="201006081751" tags="jello template" changecount="12">
-<pre>''Tags''
+<div title="Jello.wiki Tag List" creator="Jello" modifier="Jello" created="201006081702" modified="201006081751" tags="jello template" changecount="12">
+<pre>&lt;html&gt;&lt;img src=&quot;data:image/gif;base64,R0lGODlhEAAQANU8AL+/v3SheUV4VnOcd9Pd2D5yUEBxU8TSy0x9W22bdEZ3WFKDYK+vr7XHvlB8Y2aVb3CTgXWNd5ewpGaOdmqOfGiOeDhsS0FxVn2Tf1J8Zp6pn0p3Xk9PT0lwUj8/P7a+t3OXd8/Pz2uSb4+Pj2OHZ6aup8bJx6a7sTFmRl18YmyIbzZjRlx9X+/v742ej1mJZUh3W3mZid/f39bZ1+Lp5WCPaoWYhy8vL4iklvH083unf////////wAAAAAAAAAAACH5BAEAADwALAAAAAAQABAAAAalQJ5QeIBMJpDGcMnLZRa6qG6RyTF5m4RUGnBYh7jadvvALWHRQQQDEmEiA8NSENXsdjPTXYOgDek6ACE3DDsjHAAdB39RADIeADsMiCtfWFE2LTsfJXcuF0sSKA86JCwDAyopBTFDBAo6BVpbFgELJ0IGUQoGCAUCAhYXAToIBDkFOgrHFFEUOTkOAS+LDTgEQjhRZk04Elc8OAkB3OBDORUVlkNBADs=&quot; /&gt;&lt;/html&gt;&lt;br&gt;''Tags''
 &lt;&lt;list tagged jd.tag&gt;&gt;
 ----
 ''Projects''
 &lt;&lt;list tagged jd.project&gt;&gt;
 ----</pre>
 </div>
-<div title="MainMenu" creator="YourName" modifier="YourName" created="201006041547" modified="201006081655" tags="jello template" changecount="10">
+<div title="MainMenu" creator="Jello" modifier="Jello" created="201006041547" modified="201305110807" tags="jello template" changecount="19">
 <pre>&lt;&lt;today&gt;&gt;
 ----
-&lt;&lt;tiddler GTDMenu&gt;&gt;
+[[Jello View|Jello.wiki Tag List]]
 ----
-GettingStarted</pre>
+&lt;&lt;tiddler GTDMenu&gt;&gt;
++++[Calendar|Show a calendar]&lt;&lt;calendar thismonth&gt;&gt;=== </pre>
 </div>
-<div title="NestedSlidersPlugin" creator="YourName" modifier="YourName" created="201006051324" modified="201006061747" tags="systemConfig jello" changecount="2">
+<div title="NestedSlidersPlugin" creator="Jello" modifier="Jello" created="201006051324" modified="201006061747" tags="systemConfig jello" changecount="2">
 <pre>/***
 |Name|NestedSlidersPlugin|
 |Source|http://www.TiddlyTools.com/#NestedSlidersPlugin|
@@ -2371,18 +2796,18 @@ if (version.major+.1*version.minor+.01*version.revision&gt;=2.2) {
 }
 //}}}</pre>
 </div>
-<div title="NewActionTemplate" creator="YourName" modifier="YourName" created="201006051021" modified="201006051333" tags="jello template" changecount="2">
+<div title="NewActionTemplate" creator="Jello" modifier="Jello" created="201006051021" modified="201006051333" tags="jello template" changecount="2">
 <pre></pre>
 </div>
-<div title="NewContextTemplate" creator="YourName" modifier="YourName" created="201006051021" modified="201006051333" tags="jello template" changecount="2">
+<div title="NewContextTemplate" creator="Jello" modifier="Jello" created="201006051021" modified="201006051333" tags="jello template" changecount="2">
 <pre>&lt;&lt;gtdActionList&gt;&gt;</pre>
 </div>
-<div title="NewProjectTemplate" creator="YourName" modifier="YourName" created="201006051023" modified="201006051333" tags="jello template" changecount="5">
+<div title="NewProjectTemplate" creator="Jello" modifier="Jello" created="201006051023" modified="201006051333" tags="jello template" changecount="5">
 <pre>&lt;&lt;gtdActionList&gt;&gt;
 
 The outcome for this project is </pre>
 </div>
-<div title="PageTemplate" creator="YourName" modifier="YourName" created="201006051412" modified="201006061859" tags="jello template" changecount="2">
+<div title="PageTemplate" creator="Jello" modifier="Jello" created="201006051412" modified="201006061859" tags="jello template" changecount="2">
 <pre>&lt;div class='header' macro='gradient vert #000 #464646'&gt;
 &lt;div class='headerShadow'&gt;
 &lt;span class='siteTitle' refresh='content' tiddler='SiteTitle'&gt;&lt;/span&gt;&amp;nbsp;
@@ -2403,18 +2828,24 @@ The outcome for this project is </pre>
 &lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;
 &lt;/div&gt;</pre>
 </div>
-<div title="SiteSubtitle" creator="YourName" modifier="YourName" created="201006051707" modified="201006051707" changecount="2">
+<div title="SideBarOptions" creator="Jello" modifier="Jello" created="201305110738" modified="201305110739" changecount="4">
+<pre>&lt;&lt;search&gt;&gt;
+&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;newJournal &quot;DD MMM YYYY&quot; &quot;journal&quot;&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options &#187;&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
+</div>
+<div title="SiteSubtitle" creator="Jello" modifier="Jello" created="201006051707" modified="201006051707" changecount="2">
 <pre>your Outlook data tiddlywiki</pre>
 </div>
-<div title="SiteTitle" creator="YourName" modifier="YourName" created="201006051706" modified="201006051738" changecount="6">
+<div title="SiteTitle" creator="Jello" modifier="Jello" created="201006051706" modified="201305110703" changecount="8">
 <pre>Jello.wiki</pre>
 </div>
-<div title="StyleSheet" creator="YourName" modifier="YourName" created="201006051657" modified="201006101702" tags="jello template" changecount="35">
+<div title="StyleSheet" creator="Jello" modifier="Jello" created="201006051657" modified="201305110810" tags="jello template" changecount="48">
 <pre>/*}}}*/
 /***
 !Main Menu /%=================================================%/
 ***/
 /*{{{*/
+
+
 #mainMenu {
  background: #464646;
  color: #fff;
@@ -2715,14 +3146,14 @@ margin-bottom:5px;
 }
 
 #mainMenu .calendar { border: 1px solid white; }
-#mainMenu .calendar, #mainMenu .calendar tr, #mainMenu .calendar td, #mainMenu .calendar a {
+#mainMenu .calendar, #mainMenu .calendar tr, #mainMenu .calendar td, #mainMenu .calendar a { color:#ffffff
 }
 
 /*}}}*/
 
 </pre>
 </div>
-<div title="StyleSheetLayout" creator="YourName" modifier="YourName" created="201006051413" changecount="1">
+<div title="StyleSheetLayout" creator="Jello" modifier="Jello" created="201006051413" modified="201305110737" changecount="3">
 <pre>/*{{{*/
 * html .tiddler {height:1%;}
 
@@ -2896,12 +3327,15 @@ table.listView th, table.listView td, table.listView tr {padding:0px 3px 0px 3px
 .backstageVisible .whenBackstage {display:block;}
 /*}}}*/</pre>
 </div>
-<div title="d3 settings" modifier="YourName" created="201006081742" modified="201006081742" tags="excludeLists">
+<div title="TabAll" creator="Jello" modifier="Jello" created="201305110734" changecount="1">
+<pre>&lt;&lt;list all&gt;&gt;</pre>
+</div>
+<div title="d3 settings" modifier="Jello" created="201006081742" modified="201006081742" tags="excludeLists">
 <pre>Completed document conversion. Do not delete this tiddler unless you want to rebuild the action metadata.
 
 This tiddler also contains document-specific preferences which, if deleted, will revert to default settings.</pre>
 </div>
-<div title="jd.actionEditTemplate" creator="YourName" modifier="YourName" created="201006051335" modified="201006051349" tags="jello template" changecount="2">
+<div title="jd.actionEditTemplate" creator="Jello" modifier="Jello" created="201006051335" modified="201006051349" tags="jello template" changecount="2">
 <pre>&lt;div class='toolbar' macro='toolbar projectify +saveTiddler -cancelTiddler deleteAction'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
 &lt;div class='subtitle'&gt;&lt;span macro='view gtd.project'&gt;&lt;/span&gt;&lt;/div&gt;
@@ -2910,8 +3344,8 @@ This tiddler also contains document-specific preferences which, if deleted, will
 &lt;div class='editor' macro='edit tags'&gt;&lt;/div&gt;
 &lt;div class='editorFooter'&gt;&lt;span macro='message views.editor.tagPrompt'&gt;&lt;/span&gt;&lt;span macro='tagChooser'&gt;&lt;/span&gt;&lt;/div&gt;</pre>
 </div>
-<div title="jd.actionViewTemplate" creator="YourName" modifier="YourName" created="201006051335" modified="201006101700" tags="jello template" changecount="9">
-<pre>&lt;div class='toolbar' macro='toolbar changeContext changeProject deleteAction closeTiddler closeOthers +editTiddler permalink references jump'&gt;&lt;/div&gt;
+<div title="jd.actionViewTemplate" creator="Jello" modifier="Jello" created="201006051335" modified="201305110829" tags="jello template" changecount="10">
+<pre>&lt;div class='toolbar' macro='toolbar changeContext changeProject deleteAction closeTiddler closeOthers +editTiddler'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;html&gt;&lt;img src=&quot;data:image/gif;base64,R0lGODlhEAAQAOZhAPDw8LDA0KCowODg8KCw0PCQgODo8LDI4P/4/5Co0MDQ8MDQ4NDY8PDw/7Cg
 gEBQYNDY4PDooPBYMJCIYLCogODQ0LA4EEBQcGBwgJCAcKCwwLXE0+Dw8MDI4KC40MCYoMBQMPPy
 6tBIINBQINBQMMBAIPDIwMCQkIBwUMB4cLCocNDg8LCYUFBgcLC40DxTafCIcJCg0P+YgOfn4/Bg
@@ -2930,15 +3364,15 @@ CAsprChYAFFiGAEAICzoQCQAEgIEEsTwqOXFgy8XWlz4QpMml0Y4BwUCADs=&quot; /&gt;&lt;/htm
 &lt;div class='viewer' macro='view text wikified'&gt;&lt;/div&gt;
 &lt;div class='tagClear'&gt;&lt;/div&gt;&lt;br/&gt;</pre>
 </div>
-<div title="jd.projectEditTemplate" creator="YourName" modifier="YourName" created="201006060848" tags="jello template" changecount="1">
+<div title="jd.projectEditTemplate" creator="Jello" modifier="Jello" created="201006060848" tags="jello template" changecount="1">
 <pre>&lt;div class='toolbar' macro='toolbar +saveTiddler -cancelTiddler deleteProject deleteProjectAll'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit title'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit text'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit tags'&gt;&lt;/div&gt;&lt;div class='editorFooter'&gt;&lt;span macro='message views.editor.tagPrompt'&gt;&lt;/span&gt;&lt;span macro='tagChooser'&gt;&lt;/span&gt;&lt;/div&gt;</pre>
 </div>
-<div title="jd.projectViewTemplate" creator="YourName" modifier="YourName" created="201006060846" modified="201006101701" tags="jello template" changecount="5">
-<pre>&lt;div class='toolbar' macro='toolbar newAction closeTiddler closeOthers +editTiddler permalink references jump'&gt;&lt;/div&gt;
+<div title="jd.projectViewTemplate" creator="Jello" modifier="Jello" created="201006060846" modified="201305110828" tags="jello template" changecount="6">
+<pre>&lt;div class='toolbar' macro='toolbar newAction closeTiddler closeOthers +editTiddler'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;
 &lt;html&gt;&lt;img src=&quot;data:image/gif;base64,R0lGODlhEAAQAMQWAJu816TiS4yz2eL2ycPsYGag2VCkGz6CuZe3y1SRuVyqInHKKFmpIYGt2T13
 uTaVE4vWOmWuJXe6Kr7a9er0/////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEA
@@ -2950,15 +3384,15 @@ IjKNaQwVfIGVKE8RmIqbnCUzJhYhADs=&quot; /&gt;&lt;/html&gt;&amp;nbsp;
 &lt;div class='tagClear'&gt;
 &lt;/div&gt;</pre>
 </div>
-<div title="jd.tagEditTemplate" creator="YourName" modifier="YourName" created="201006051332" modified="201006051349" tags="jello template" changecount="2">
+<div title="jd.tagEditTemplate" creator="Jello" modifier="Jello" created="201006051332" modified="201006051349" tags="jello template" changecount="2">
 <pre>&lt;div class='toolbar' macro='toolbar +saveTiddler -cancelTiddler deleteContext'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit title'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit text'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit tags'&gt;&lt;/div&gt;&lt;div class='editorFooter'&gt;&lt;span macro='message views.editor.tagPrompt'&gt;&lt;/span&gt;&lt;span macro='tagChooser'&gt;&lt;/span&gt;&lt;/div&gt;</pre>
 </div>
-<div title="jd.tagViewTemplate" creator="YourName" modifier="YourName" created="201006051331" modified="201006101701" tags="template jello" changecount="12">
-<pre>&lt;div class='toolbar' macro='toolbar newAction closeTiddler closeOthers +editTiddler permalink references jump'&gt;&lt;/div&gt;
+<div title="jd.tagViewTemplate" creator="Jello" modifier="Jello" created="201006051331" modified="201305110828" tags="template jello" changecount="13">
+<pre>&lt;div class='toolbar' macro='toolbar newAction closeTiddler closeOthers +editTiddler'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;
 &lt;html&gt;&lt;img src=&quot;data:image/gif;base64,R0lGODlhEAAQAMQeAJu814Gt2f6Jkoyz2Wag2c/r/DyAG/nT1Ueo3dJTXJe3yz6CuWnGPv3s7ur4
 /tD1usTyqDeTFFSRua7xfZntXWjAQkqpG4jW/z13ubskLxaLyer0/77a9f///////wAAACH5BAEA
@@ -2970,13 +3404,13 @@ g5CRkR0ZfZabIjIhADs=&quot; /&gt;&lt;/html&gt;&amp;nbsp;
 &lt;div class='tagClear'&gt;
 &lt;/div&gt;</pre>
 </div>
-<div title="jello" creator="YourName" modifier="YourName" created="201006081659" tags="excludeLists" changecount="1">
+<div title="jello" creator="Jello" modifier="Jello" created="201006081659" tags="excludeLists" changecount="1">
 <pre>system tag</pre>
 </div>
-<div title="systemConfig" creator="YourName" modifier="YourName" created="201006081700" tags="excludeLists" changecount="1">
+<div title="systemConfig" creator="Jello" modifier="Jello" created="201006081700" tags="excludeLists" changecount="1">
 <pre>system tag</pre>
 </div>
-<div title="template" creator="YourName" modifier="YourName" created="201006081700" tags="excludeLists" changecount="1">
+<div title="template" creator="Jello" modifier="Jello" created="201006081700" tags="excludeLists" changecount="1">
 <pre>system tag</pre>
 </div>
 </div>
@@ -3242,7 +3676,7 @@ config.shadowTiddlers = {
 // Strings in "double quotes" should be translated; strings in 'single quotes' should be left alone
 
 merge(config.options,{
-	txtUserName: "YourName"});
+	txtUserName: "Jello"});
 
 merge(config.tasks,{
 	save: {text: "save", tooltip: "Save your changes to this TiddlyWiki", action: saveChanges},
