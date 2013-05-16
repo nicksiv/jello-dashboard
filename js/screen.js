@@ -1023,10 +1023,16 @@ Ext.getCmp("previewpanel").collapse(true); }
 historyPlace++; history[historyPlace]=func; 
 var bb=document.getElementById("backbtn"); 
 var fb=document.getElementById("forwbtn"); 
-if (historyPlace>1) { bb.filters.alpha.opacity=100; } else { bb.filters.alpha.opacity=40; } 
-if (historyPlace+1==history.length) {fb.filters.alpha.opacity=40;} else {fb.filters.alpha.opacity=100;} 
+if (historyPlace>1) { alphaFilter(bb,100); } else {  alphaFilter(bb,40); } 
+if (historyPlace+1==history.length) { alphaFilter(fb,40);} else { alphaFilter(fb,100);} 
 //homie.style.display="inline"; 
 
+}
+
+function alphaFilter(ob,vl)
+{
+try{
+ob.filters.alpha.opacity=vl;}catch(e){}
 }
 
 function pBack()

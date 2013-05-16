@@ -1,4 +1,4 @@
-Jello Dashboard 5.26 (Astral) beta
+Jello Dashboard 5.30 beta
 -----------------------------------------------------------------
 This application is released under the Open Source GPLv3 license.
 =================================================================

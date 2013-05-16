@@ -44,7 +44,7 @@ var simple = new Ext.FormPanel({
         frame:true,
 //        fileUpload: true,
 //        height:380,
-    	title:'TiddlyWiki sync',
+    	title:'TiddlyWiki export',
         bodyStyle:'padding:5px 5px 0 30px',
         floating:false,
         labelWidth:115,

@@ -43,8 +43,14 @@ var defaultWidgetHeight=170;
 var elmRemoveTag="X";
 var webJDversion="";
 var webCheckHours=240; //check for updates every 10 days
+//export settings to file setting
 var setExportFile="";
+//tiddlywiki export setting
 var lastTiddlyWiki="";
+//todo.txt settings
+var lastTodotxt="";
+var todotxtLastSync="";
+var todotxtOLitems="";
 
 //Icons
 var imgPath="img\\";

@@ -13,7 +13,7 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Jello Dashboard.  If not, see <http://www.gnu.org/licenses/>.
 //
-//    2008-2012 N.Sivridis http://jello-dashboard.net
+//    2008-2013 N.Sivridis http://jello-dashboard.net
 
 
 var isProject=false;
