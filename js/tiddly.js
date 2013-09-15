@@ -501,6 +501,7 @@ if (choice=confirm("Sync with last file used? "+lastf)==false){return;}
             tiddlySync(mode,folder,file,tskip,sp,si,onf);
 
 }
+
 String.prototype.htmlEncode = function()
 {
 	return this.replace(/&/mg,"&amp;").replace(/</mg,"&lt;").replace(/>/mg,"&gt;").replace(/\"/mg,"&quot;");

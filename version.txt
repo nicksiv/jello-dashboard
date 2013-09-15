@@ -1,6 +1,10 @@
-varsion 5.30
-- Added Tiddlywiki export of Outlook data
-- Changed install.hta interface and renamed to jelloapp.hta
+version 5.30
+- Added: Tiddlywiki export of Outlook data
+- Changed: install.hta interface and renamed to jelloapp.hta
+- Fixed: Handling of encrypted items in inbox
+- Fixed Inbox error with currentView.Filter crashed system
+- Added data export to todo.txt function in jelloapp.hta
+
 
 version 5.26
 - Changed: Shortcut key for ticklers popup to Ctrl+Alt+w

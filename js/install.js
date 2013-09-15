@@ -37,7 +37,7 @@ Ext.onReady(function(){
 		Ext.QuickTips.init();
 paintScreen();
 //temp
-pTodotxt();
+//pTodotxt();
 
         });
 
@@ -69,7 +69,7 @@ rfun4+="<a class=jellolink onclick=openWebLinkinDefaultBrowser('https://github.c
 var rfun2="<a class=jellolink onclick=javascript:pSettings();><img class='htaimg' src='img\\settings16.png' />"+txtInSetLoca+"</a>";
 rfun2+="<br><a class=jellolink onclick=javascript:pImpExp();><img class='htaimg' src='img\\ud-tags (4).gif' />Settings Import/Export</a>";
 
-var rfun5="<a class=jellolink onclick=javascript:pTodotxt();><img class='htaimg' src='img\\ud-folder (21).gif' />Sync with Todo.txt</a>";
+var rfun5="<a class=jellolink onclick=javascript:pTodotxt();><img class='htaimg' src='img\\ud-folder (21).gif' />Export Todo.txt</a>";
 rfun5+="<br><a class=jellolink onclick=javascript:pWiki();><img class='htaimg' src='img\\page_url.gif' />Export to Tiddly Wiki</a>";
 
 var vp=new Ext.Viewport({
@@ -90,7 +90,7 @@ var vp=new Ext.Viewport({
 		items:[
 			{title:'Outlook Setup',bodyStyle:'padding:6px',html:rfun1},
 		    	{title:'Settings Storage',bodyStyle:'padding:6px',html:rfun2},
-		    	{title:'Syncronize data',bodyStyle:'padding:6px',html:rfun5},
+		    	{title:'Export data',bodyStyle:'padding:6px',html:rfun5},
 
 		    	{title:'Run Jello',bodyStyle:'padding:6px',html:rfun3},
 		    	{title:'Links',bodyStyle:'padding:6px',html:rfun4,collapsible:true,collapsed:true}

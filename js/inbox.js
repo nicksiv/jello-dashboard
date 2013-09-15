@@ -52,6 +52,9 @@ function getInboxItems(cmd,istore,olFolder,dasl,page,clear)
 //cmd=0 count, cmd=1 add items to store
 //if page=0 add all records, otherwise go to specific page using jello.pageSize
 //clear=true clear store before adding new records
+
+
+
 var theFolder = olFolder;
 if( theFolder.Class != 2)
 	theFolder = theFolder.Parent;
@@ -71,8 +74,11 @@ else
 iits.Sort(sortTables[olFolder.DefaultItemType],inboxSortOrder[olFolder.DefaultItemType]);
 }else{iits=olFolder;}
 var counter=iits.Count;
+
 if( counter == 0)
-	return counter;
+	{
+	  return counter;
+	}
 
 //switch(olFolder.DefaultItemType){
 //	case 1:
@@ -146,8 +152,11 @@ if (clear==true){istore.removeAll();}
       if (lEnd>allCount){lEnd=allCount;}
     		if (olitms.Count>0)
     		{
-    	
+    try{	
       var ifname=olitms(1).Parent.Name;
+	}
+  catch(e)
+  {var ifname="Item";}
 		  
 			for (var x=lStart;x<=lEnd;x++)
 			{
@@ -811,7 +820,7 @@ newA.Display();
 function inboxAction(btn,vl,param,oneitem)
 {
 //execute inbox toolbar
-
+//if (btn==undefined){alert("Cannot do that!");return;}
 var dpass = new Array();
 refreshWholeView=false;
 var itemsToArchive=new Array();
@@ -842,10 +851,12 @@ var t=null;
 			var id=cit[x].get("entryID");
 			try{
 				var it=NSpace.GetItemFromID(id);
-			}catch (e){store.remove(cit[x]);continue;}
+			}catch (e){/*store.remove(cit[x]);*/}
 		}
 
-	if (btn!=null)
+	
+  
+  if (btn!=null)
 	{
 
  
@@ -934,12 +945,12 @@ var t=null;
 		if (vl=="del" || vl=="icmdel")
 		{//delete item
 		if (t==null){t=confirm(txtMsgDelItem);}
-		if (t==true){OLDeleteItem(id);
+		if (t==true){if (OLDeleteItem(id)==true){continue;}
 			if (!noRecord){updateRecordItem(cit[x],true);gridGo((jello.goNextOnDelete?1:-1));}
 			imsg=txtMsgDeleted;}
 		else{imsg=null;}
 		}
-
+    
 		if (vl=="due" || vl=="icmdue")
 		{//add due date
 
@@ -963,6 +974,8 @@ var t=null;
 		}
 
 	}
+
+ // if (itemList.length==0){alert("Some of the items selected could not be found!\nTry to remove those from Outlook.");pInbox();return;}
 
 // do deletes and moves -
 try{
@@ -1677,17 +1690,25 @@ if (jello.noUseMail==1 || jello.noUseMail=="1"){showNoMailInbox(dasl);return;}
 counter=getInboxItems(1,listStore,iF,dasl,-999,true); //get all tasks
 
 tasksCounter=counter;
+
 if (jello.noUseMail==false || jello.noUseMail==0 || jello.noUseMail=="0")
   {
   folder=setAndCheckArcFolder(jello.inboxFolder);
-  if (folder==null){alert(txtMsgInvInbFol);}
+  if (folder==null){alert(txtMsgInvInbFol);
+    }
+    
   else{
   	  lastInboxUpdateTime = new Date();
 	//counter+=getInboxItems(1,listStore,folder,null,1,false);} // get first page of emails
-	counter+=getInboxItems(1,listStore,folder,folder.CurrentView.Filter,1,false);
+      try{	
+//** Use of the currentview.filter breaks the system in OL 2010	
+//    counter+=getInboxItems(1,listStore,folder,folder.CurrentView.Filter,1,false);
+     counter+=getInboxItems(1,listStore,folder,null,1,false);}catch(e){}
+
   }
   
   }
+
 }
 else
 {//any folder view
@@ -1709,7 +1730,7 @@ if (nativeView)
 
 //counter=getInboxItems(1,listStore,folder,null,1,true);
 var tFilter="";
- 
+
 if (OLversion>11)
       {
       if (folder.Store.IsDataFileStore)

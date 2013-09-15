@@ -332,7 +332,7 @@ try{
 				   icon: Ext.MessageBox.QUESTION
 				});
 			  }else if (jello.removeLinked==1 || jello.removeLinked=="1"){
-				try{it.Delete();}catch(e){}
+				try{it.Delete();}catch(e){alert("This item could not be deleted\nYou should use Outlook to do that!");}
 			  }
 
 
@@ -343,7 +343,7 @@ try{
 	}
 	}
 	d.Delete();
-}catch (e){};
+}catch (e){alert("Could not perform selected action on Outlook item.");return true;};
 showOLViewCtl(true);
 updateInboxCount();
 updateTheLatestThing();

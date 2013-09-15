@@ -1176,6 +1176,11 @@ try{this.entryID=eID.EntryID;}catch(e)
   this.body=txtItOffline;
   this.created = this.due = new Date();
   this.iclass=43;
+  this.icon="999;0;0";
+  this.type="a";
+  
+  this.groupon = (eID.Class == 43? 1:0);
+  
   return;
   }
 
@@ -1682,6 +1687,10 @@ if (c==null){ic=icApp;return "<img src=img\\"+ic+">";}
 if (c==48){
 if (cst==0 && jello.showNotStartedAlways==false){ic=icTaskNS;}
 if (cse==2){ic=icTaskP;}}
+if (c==999)
+{//encrypted or unable to read items
+ic="icon_key.gif"
+}
 ic=iconBasedOnClass(c,ic);
 //attached items (for multi action tasks!) Try to have this in action object
 var sic=icTask;
