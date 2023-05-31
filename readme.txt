@@ -1,3 +1,27 @@
+Whatever happened to Jello Dashboard
+=====================================
+
+For quite some time now, I feel the need to explain my decision to stop developing the only widespread
+application have ever developed.
+Jello Dashboard was a great ride It was the best way for me to learn to do stuff l have never done before, like
+maintaining a code base, reply to user comments, fixing bugs, building product web pages and a hundred more
+smaller things, a person must do in a one-man application.
+l started on my own to fulfill my own needs, but to my surprise, one after the other, many people showed
+interest in what was building and helped me out in many different ways, something l will forever be grateful for
+Arter almost 10 years of development, the project had to come to an end for several reasons. The main building
+blocks of the application, JavaScript and HTML, were just using a feature of Outlook (the folder homepage) which
+was exposing the outlook object model to many risks, so Microsoft applied numerous security fixes limiting my
+application s functionality l worked around methods to bypass some of the restrictions, but in the end l was
+feeling like a virus developer who tries to exploit security weaknesses
+Apart from that, we are now in the mobile sync era, users demand such features and applications which cannot
+implement them, are bound to die slowly
+Although I tried to synchronize my application withsome web services, the outcome was not successful and
+without modern debugging capabilities (l used a simple text editor and IE debugger) l couldn't cope with such
+complexity.
+And that's about it. Thanks to all the people who tested and used my application, who submitted code, did
+translations and gave life to my project.
+
+
 Jello Dashboard 5.30 beta
 -----------------------------------------------------------------
 This application is released under the Open Source GPLv3 license.
@@ -19,7 +43,7 @@ Features
 -  Review your action lists easily 
 -  Get your lists, print or send them 
 -  Work with your familiar Outlook application and its items 
--  Control application’s behavior through an extensive set of user settings 
+-  Control applicationâ€™s behavior through an extensive set of user settings 
 
 Jello Dashboard will load when you select you folder of choice from the Outlook folder hierarchy. 
 
@@ -43,9 +67,6 @@ Alternatively you can try to run jello.hta standalone or jello5.htm file directl
 
 =================================================================
 
-Post comments, questions and suggestions to the Jello.Dashboard forum
-http://jello-dashboard.net/forum
-
 
 Nicolas Sivridis
-http://jello-dashboard.net
+https://jellodashboard.blogspot.com/
